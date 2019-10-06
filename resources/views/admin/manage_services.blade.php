@@ -60,8 +60,10 @@
               </div>
               <!-- Card body -->
               <div class="card-body">
-                <form>
+                <form id="ajaxForm" method="PUT" action="javascript:void(0)">
+                @csrf
                   <!-- Input groups with icon -->
+                  <input type="hidden" id="hiddenId" name="id">
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-group">
@@ -86,8 +88,8 @@
                   </div>
                   <!-- <div id="description" data-toggle="quill" data-quill-placeholder="Quill WYSIWYG"> <div id="ans">dd</div></div> -->
                   <textarea name="description" class="form-control" id="description" cols="60" rows="10"></textarea>
-                  <button id='update' class="btn btn-primary"  style="float:right;margin-top:20px;">Update</button>
-                  <button id='add_new' class="btn btn-primary"  style="float:right;margin-top:20px;">Add New</button>
+                  <button id='update' class="btn btn-primary" onclick="updateService()"  style="float:right;margin-top:20px;">Update</button>
+                  <button id='add_new' class="btn btn-primary" onclick="storeService()" style="float:right;margin-top:20px;">Add New</button>
                 </form>
               </div>
             </div>
@@ -107,9 +109,80 @@
     $('#update').show();
     $('#add_new').hide();
     $("#category").focus();
+    document.getElementById('hiddenId').value = $id;
     document.getElementById('category').value = $cat;
     document.getElementById('icon').value = $icon;
     document.getElementById('description').value = $description;
+  }
+
+</script>
+<script>
+  
+  function updateService() {
+    var id = document.getElementById('hiddenId').value;
+    var service = document.getElementById('category').value;
+    var icon = document.getElementById('icon').value;
+    var description = document.getElementById('description').value;
+    var token = "{{ csrf_token() }}";
+
+    $.ajaxSetup({
+      headers:{
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+    });
+    $.ajax({
+      type:'PUT',
+      url: "/admin/services/"+id,
+      data: {
+        _token: token,
+        _method:'PUT',
+        'service' : service,
+        'icon': icon,
+        'description': description,
+      },
+      contentType : 'application/json',
+      dataType:'json',
+      beforeSend: function () {
+        alert('yes')
+      },
+      success: function(data) {
+        alert(data);
+      }
+      // console.log(data);
+      // error: function(data){
+      //   console.log(data);
+      // }
+    });
+  }
+</script>
+<script>
+  function storeService() {
+    // var id = document.getElementById('hiddenId').value;
+    var service = document.getElementById('category').value;
+    var icon = document.getElementById('icon').value;
+    var description = document.getElementById('description').value;
+    // var token = "{{ csrf_token() }}";
+
+    $.ajaxSetup({
+      headers:{
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+    });
+    $.ajax({
+      type:'POST',
+      url: "http://127.0.0.1:8000/admin/services/store",
+      data: $('#ajaxForm').serialize(),
+      beforeSend: function () {
+        alert('new')
+      },
+      success: function() {
+        $('#update').show();
+        // console.log(data);
+      }
+      // error: function(data){
+      //   console.log(data);
+      // }
+    });
   }
 </script>
 @endsection

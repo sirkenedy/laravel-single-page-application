@@ -16,6 +16,7 @@ Route::prefix('/admin')->name('admin.')->namespace('Admin')->group(function(){
         // These will be prefixed with "manager" and assigned the "manager_guest" middleware
         Route::get('/dashboard','HomeController@index')->name('dashboard')->middleware('auth:admin');
         Route::get('/services','ServiceController@index')->name('services')->middleware('auth:admin');
+        Route::put('/services/{id}',['uses'=>'ServiceController@update', 'as'=>'services.update']);
         Route::get('/about','AboutController@index')->name('about')->middleware('auth:admin');
         Route::get('/portfolio','PortfolioController@index')->name('portfolio')->middleware('auth:admin');
         Route::get('/profile','ProfileController@index')->name('profile')->middleware('auth:admin');
@@ -31,6 +32,9 @@ Route::prefix('/admin')->name('admin.')->namespace('Admin')->group(function(){
         Route::post('/logout','LoginController@logout')->name('logout');
     });
 });
+
+
+Route::post('admin/services/store',['uses'=>'ServiceController@store', 'as'=>'services.store']);
 
 // Route::get('/admin', function () {
 //     return view('admin.dashboard');
@@ -53,9 +57,9 @@ Route::prefix('/admin')->name('admin.')->namespace('Admin')->group(function(){
 // Route::get('/profile', function () {
 //     return view('admin.profile');
 // });
-// Route::get('/login', function () {
-//     return view('admin.login');
-// });
+Route::put('/services/{id}', function () {
+    return response()->json($id);
+});
 Route::resource('', 'HomesController');
 
 Auth::routes();
