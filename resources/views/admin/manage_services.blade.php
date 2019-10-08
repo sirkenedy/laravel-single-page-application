@@ -1,7 +1,7 @@
 @extends('includes.admin_header')
 
 @section('content')
-<div class="container-fluid mt--6">
+<div class="container-fluid mt--6 main-page">
       <div class="row">
         <div class="col-lg-6">
           <div class="card-wrapper">
@@ -25,7 +25,8 @@
               </tr>
             </thead>
             <tbody>
-              @foreach($services as $service)
+           
+              @foreach( \App\Service::all() as $service)
               <tr>
                 <td>
                   <span class="text-muted">{{$service->service}}</span>
@@ -60,10 +61,10 @@
               </div>
               <!-- Card body -->
               <div class="card-body">
-                <form id="ajaxForm" method="PUT" action="javascript:void(0)">
+                <form id="ajaxForm" method="POST" action="javascript:void(0)">
                 @csrf
                   <!-- Input groups with icon -->
-                  <input type="hidden" id="hiddenId" name="id">
+                  <input type="hidden" id="hiddenId" name="hiddenId">
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-group">
@@ -71,7 +72,7 @@
                           <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                           </div>
-                          <input class="form-control" id='category' placeholder="Your name" type="text">
+                          <input class="form-control" id='category' name="service" placeholder="Your name" type="text">
                         </div>
                       </div>
                     </div>
@@ -81,11 +82,12 @@
                           <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                           </div>
-                          <input class="form-control" id='icon' placeholder="Email address" type="text">
+                          <input class="form-control" id='icon' name="icon" placeholder="Email address" type="text">
                         </div>
                       </div>
                     </div>
                   </div>
+                    <input type="hidden" value="{{csrf_token()}}">
                   <!-- <div id="description" data-toggle="quill" data-quill-placeholder="Quill WYSIWYG"> <div id="ans">dd</div></div> -->
                   <textarea name="description" class="form-control" id="description" cols="60" rows="10"></textarea>
                   <button id='update' class="btn btn-primary" onclick="updateService()"  style="float:right;margin-top:20px;">Update</button>
@@ -104,6 +106,8 @@
   $(window).on('load',function() {
       $('#update').hide();
   });
+
+
   function editService($id,$cat, $icon, $description){
     // alert('yes');
     $('#update').show();
@@ -117,43 +121,75 @@
 
 </script>
 <script>
-  
-  function updateService() {
-    var id = document.getElementById('hiddenId').value;
-    var service = document.getElementById('category').value;
-    var icon = document.getElementById('icon').value;
-    var description = document.getElementById('description').value;
-    var token = "{{ csrf_token() }}";
+    function updateService() {
+        var btn = document.getElementById('update');
+            jQuery("#ajaxForm").submit(function(e){
+                    e.preventDefault();
+                    var formData = jQuery(this).serialize();
+                    $.ajax({
+                        type: "POST",
+                        url: "/admin/services/",
+                        data: formData,
+                        dataType: "json",
+                        beforeSend: function(xhr) {
+                          btn.disabled = true;
+                          btn.innerText = 'Updating...'
+                        },
+                        complete: function(response) {
+                      
+                         
+                          btn.innerText = 'Update'
+                        	 
+                         },
+                       success: function(json){
+                            
+                            console.log(json);
+                            btn.disabled = 'false';
+                            $(".table-responsive").load(" .table-responsive");
+                             
 
-    $.ajaxSetup({
-      headers:{
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-      }
-    });
-    $.ajax({
-      type:'PUT',
-      url: "/admin/services/"+id,
-      data: {
-        _token: token,
-        _method:'PUT',
-        'service' : service,
-        'icon': icon,
-        'description': description,
-      },
-      contentType : 'application/json',
-      dataType:'json',
-      beforeSend: function () {
-        alert('yes')
-      },
-      success: function(data) {
-        alert(data);
-      }
-      // console.log(data);
-      // error: function(data){
-      //   console.log(data);
-      // }
-    });
-  }
+                      }
+                    });
+                    return false;
+                });
+            }
+  // function updateService() {
+  //   var id = document.getElementById('hiddenId').value;
+  //   var service = document.getElementById('category').value;
+  //   var icon = document.getElementById('icon').value;
+  //   var description = document.getElementById('description').value;
+  //   var token = "{{ csrf_token() }}";
+
+  //   $.ajaxSetup({
+  //     headers:{
+  //       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+  //     }
+  //   });
+  //   $.ajax({
+  //     type:'POST',
+  //     url: "/admin/services/",
+  //     data: {
+  //       _token: token,
+  //       _method:'POST',
+  //       'service' : service,
+  //       'hiddenId' : id,
+  //       'icon': icon,
+  //       'description': description,
+  //     },
+  //     contentType : 'application/json',
+  //     dataType:'json',
+  //     beforeSend: function () {
+  //       alert('yes')
+  //     },
+  //     success: function(data) {
+  //       alert(data);
+  //     }
+  //     // console.log(data);
+  //     // error: function(data){
+  //     //   console.log(data);
+  //     // }
+  //   });
+  // }
 </script>
 <script>
   function storeService() {
@@ -178,10 +214,7 @@
       success: function() {
         $('#update').show();
         // console.log(data);
-      }
-      // error: function(data){
-      //   console.log(data);
-      // }
+      },
     });
   }
 </script>

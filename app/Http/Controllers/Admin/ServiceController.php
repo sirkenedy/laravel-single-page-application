@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Validator;
 use App\Service;
 
 class ServiceController extends Controller
@@ -24,22 +25,24 @@ class ServiceController extends Controller
         ])->with('services', $services);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $validator = Validator::make(Input::all(), $this->rules);
-        if ($validator->fails()) {
-            return Response::json(array('errors' => $validator->getMessageBag()->toArray()));
-        } else {
+        $id = $request->hiddenId;
+        // $validator = Validator::make(Input::all(), $this->rules);
+        // if ($validator->fails()) {
+        //    return Response::json(array('errors' => $validator->getMessageBag()->toArray()));
+        // } else {
+           //Updating Values
             $service = Service::findOrFail($id);
             $service->image = $request->icon;
-            $service->category = $request->service;
+            $service->service = $request->service;
             $service->description = $request->description;
-            $service->save();
+            $service->update();
             return \response()->json($service);
-        }
+        //}
+       // return \response()->json('Error', 'Errsor Ocuured');
     }
-    public function store(Request $request)
-    {
+    public function store(){
         $validator = Validator::make(Input::all(), $this->rules);
         if ($validator->fails()) {
             return Response::json(array('errors' => $validator->getMessageBag()->toArray()));
